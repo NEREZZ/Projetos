@@ -1,0 +1,191 @@
+#include <LiquidCrystal_I2C.h>
+#include "SoftwareSerial.h"
+#include <Fio.h>
+#include <SPI.h>
+#include <MFRC522.h>
+
+#define verde 2
+#define vermelho 3
+#define SS_PIN 10
+9 #define RST_PIN
+
+String tagID = "53ac6d9b";
+bool acessoliberado = falso;
+#define Do 262
+#define Re 294
+#define Mi 330
+#define Fa 349
+#define Sol 392
+#define La 440
+#define Si 494
+#define pinBuzzer 7
+#define col 16 // Serve para definir o número de colunas do display utilizado
+#define lin 1 // Serve para definir o número de linhas do display utilizado
+#define ende 0x27
+ALTERE ESSES VALORES PARA OS DA SUA TAG/CARTÃO
+String TagsLiberadas[] = { "53ac6d9b", "ID2" };
+MFRC522 RFID(SS_PIN, RST_PIN);
+
+tempo int = 0;
+Carvão R;
+Flutuar Lerlumux;
+int lumux = A1;
+Int Luix;
+int valorlido = 0;
+int emcasa = 0; Certifique-se de usar o número correto do pino
+
+SoftwareSerial bluetooth(1, 0);
+
+LiquidCrystal_I2C lcd(ende, col, lin);
+
+void setup() {
+ lcd.init(); Serve para iniciar a comunicação com o display já conectado
+ lcd.backlight(); Serve para ligar a luz do display
+ lcd.clear(); Serve para limpar a tela do display
+  Serial.begin(9600);
+ pinMode(6, SAÍDA); Declara a porta 6 como saiba
+ pinMode (pinBuzzer, SAÍDA);
+ pinMode(lumux, ENTRADA); Declara a variável lumux como entrada
+  bluetooth.begin(9600);// inicia o bluetooth
+ SPI.begin();  Comunicação SPI
+ RFID. PCD_Init();  Leitor RFID
+ pinMode(verde, SAÍDA);
+ pinMode(vermelho, SAÍDA);
+}
+
+Funcionamento do alarme 1º opção
+void loop() {
+
+  if (bluetooth.available())// verifica o sinal do bluetooth
+ r = bluetooth.read(); Envia os dados recebidos do Bluetooth para a variação R
+ valorlido = analógicoRead(A0); Declarado o pino onde o sensor PIR está recebendo sinal
+ 
+
+  if (valorlido > 300 && emcasa == 0) {
+    lcd.clear();
+    lcd.print("Movimento porta");
+    Serial.write(valorlido);
+ atraso (2000);
+    lcd.clear();
+    lcd.print(" Aproxime a TAG  ");
+  }
+
+
+  Serial.print("bt = ");
+  Serial.println(r); \\ printa o valor de r na tela
+  Serial.print("movi = ");
+  Serial.println(valorlido);
+ Verifica se existem tags/cartões
+ se (! RFID. PICC_IsNewCardPresent() || ! RFID. PICC_ReadCardSerial()) {
+ retornar;
+  }
+
+ tagID = ""; esvazia uma string
+
+ Aqui será feita a coleta das tags pela função uid
+ para (byte i = 0; i < RFID.uid.size; i++) {
+    tagID.concat(String(RFID.uid.uidByte[i], HEX));
+  }
+
+  //Aqui será feita a comparação das Tags analisadas com as cadastradas
+  for (int i = 0; i < (sizeof(TagsLiberadas) / sizeof(String)); i++) {
+    if (tagID.equalsIgnoreCase(TagsLiberadas[i])) {
+      acessoliberado = true;  //Libera tag
+    }
+  }
+  if (r == '0') {
+  lcd.clear();
+  lcd.print("Sistema ligado");
+  delay(5000);
+  lcd.clear();
+}
+
+  if (acessoliberado == true) {
+    Serial.println("Acesso Liberado para a TAG: " + tagID);
+    lcd.clear();
+    lcd.print(" Acesso Liberado  ");
+    Liberado();
+    delay(5000);
+    lcd.clear();
+    lcd.print(" Aproxime a TAG  ");
+
+  } else {
+    Serial.println("Acesso Negado para a TAG: " + tagID);
+    lcd.clear();
+    lcd.print(" Acesso Negado  ");
+    Negado();
+    lcd.clear();
+    lcd.print(" Aproxime a TAG  ");
+    
+  }
+  delay(1000);
+}
+
+void Liberado() {
+  int avisos = 1;
+  for (int j = 0; j < avisos; j++) {
+    digitalWrite(verde, HIGH);
+    delay(3000);
+    digitalWrite(verde, LOW);
+    delay(1000);
+  }
+  acessoliberado = false;
+}
+
+\\ Se o cartão de acesso for desconhecido ele verifica 2x e caso confirme que é desconhecido soa o alarme
+void Negado() {
+  int avisos = 2;
+  for (int j = 0; j < avisos; j++) {
+    digitalWrite(vermelho, HIGH);
+    delay(1500);
+    digitalWrite(vermelho, LOW);
+    delay(500);
+  }
+  
+\\ Aqui está a frequencia da musica tocada (" Lost woods " do jogo Zelda)
+  digitalWrite(6, HIGH); // toca o buzzer e acende o led vermelho que está na porta 6 do arduino
+  tone(pinBuzzer, Fa);
+  delay(250);
+  tone(pinBuzzer, La);
+  delay(250);
+  tone(pinBuzzer, Si);
+  delay(500);
+  tone(pinBuzzer, Fa);
+  delay(250);
+  tone(pinBuzzer, La);
+  delay(250);
+  tone(pinBuzzer, Si);
+  delay(500);
+  tone(pinBuzzer, Fa);
+  delay(250);
+  tone(pinBuzzer, La);
+  delay(250);
+  tone(pinBuzzer, Si);
+  delay(250);
+  tone(pinBuzzer, 700);
+  delay(250);
+  tone(pinBuzzer, 493);
+  delay(250);
+  tone(pinBuzzer, 550);
+  delay(500);
+  tone(pinBuzzer, 650);
+  delay(250);
+  tone(pinBuzzer, Si);
+ atraso (250);
+ tom (pinBuzzer, Sol);
+ atraso (500);
+ tom (pinBuzzer, Re);
+ atraso (250);
+ tom (pinBuzzer, Mi);
+ atraso (250);
+ tom (pinBuzzer, Fa);
+ atraso (300);
+ tom (pinBuzzer, Re);
+ atraso (300);
+ tom (pinBuzzer, Fa);
+ atraso (500);
+
+ digitalWrite(6, BAIXO);
+ noTone(pinBuzzer); faz o buzzer parar de tocar
+ atraso (500);
+}
