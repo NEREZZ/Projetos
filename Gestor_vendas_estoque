@@ -10,8 +10,7 @@ struct Vendas
 {
     int id;
     int vendas_realizadas[MAX];
-    float valor_venda[MAX];
-    int vendidos[MAX];
+    float valor_venda;
     int quantidade;
     int fio;
     float valor_fio;
@@ -37,7 +36,7 @@ void cadastrar()// cadastra os produtos e cria um arquivo de texto para serem gu
 {
 
     int i = 0, n = 0;char ler =0;
-  
+
 
     FILE *estoq;
     estoq = fopen("C:\\RelatoriosLoja\\estoque.txt", "a");
@@ -46,7 +45,7 @@ void cadastrar()// cadastra os produtos e cria um arquivo de texto para serem gu
         printf("Erro ao abrir o arquivo.\n");
         return 1;
     }
-  
+
     printf("Digite quantos produtos serao cadastrados:");
     scanf("%d", &n);
     if (n == 0)
@@ -55,15 +54,13 @@ void cadastrar()// cadastra os produtos e cria um arquivo de texto para serem gu
     }
     for (i = 0; i < n; i++)
     {
-         
+
         printf("Digite o id do produto: ");
         scanf("%d", &estk[i].id);
         while((estk[i].id>=0)==false){
              printf("ID INVALIDO! TENTE NOVAMENTE");
-         
+
         }
-
-
         printf("Digite o nome do produto: ");
         scanf("%s", &estk[i].produto);
 
@@ -73,7 +70,6 @@ void cadastrar()// cadastra os produtos e cria um arquivo de texto para serem gu
         }
         printf("Digite a quantidade: ");
         scanf("%d", &estk[i].quantity);
-       
 
         printf("Digite o preco: ");
         scanf("%f", &estk[i].preco);
@@ -81,8 +77,8 @@ void cadastrar()// cadastra os produtos e cria um arquivo de texto para serem gu
              printf("PRECO INVALIDO! TENTE NOVAMENTE");
              break;
         }
-    
-       
+
+
         fprintf(estoq, "| ID: %d | PRODUTO: %s | QUANTIDADE: %d | PREÇO:R$%.1f |\n", estk[i].id, estk[i].produto,estk[i].quantity, estk[i].preco);
     }
 
@@ -94,39 +90,41 @@ void cadastrar()// cadastra os produtos e cria um arquivo de texto para serem gu
 }
 void realizar_venda()// esse procedimento é para de venda de um produto qualquer sem especificações
 {
-    int i, v,sobrou=0;
+    int i, v,n=0,sobrou=0;
     FILE *vendi;
     vendi = fopen("C:\\RelatoriosLoja\\vendas.txt", "a");
-    while (i != 0)
+     printf("Digite quantos produtos serao vendidos: ");
+     scanf("%d", &n);
+    for(i=0;i<n; i++)
     {
         printf("Digite o id do produto: ");
         scanf("%d", &loja[i].id);
 
-       
+
         printf("Qual valor da venda:R$ ");
-        scanf("%f", loja[i].valor_venda);
-        while((loja[i].valor_venda>=0)==false){
-             printf("ID INVALIDO! TENTE NOVAMENTE");
-        }
+        scanf("%f", &loja[i].valor_venda);
+
         v++;
         loja[i].vendas_realizadas[i] = v;
-        
 
-        fprintf(vendi, "o ID[%d]  VALOR R$%.1f  ", loja[i].id, loja[i].valor_venda);
+
+        fprintf(vendi," ID:%d      | VALOR R$%.1f \n ", loja[i].id, loja[i].valor_venda);
     }
 }
 void tela() // esse procedimento é para apenas vendas de telas de arame
 {
     float result=0;
-    int i=0;
+    int i=0,n;
      FILE *tela;
     tela = fopen("C:\\RelatoriosLoja\\vendas_tela.txt", "a");
-     while (i != 0)
+     printf("Digite quantos produtos serao vendidos: ");
+     scanf("%d", &n);
+    for(i=0;i<n; i++)
     {
         printf("Digite o tipo de tela: ");
         scanf("%s",&loja[i].nome);
         printf("Digite qual FIO: ");
-        scanf("%d", &loja[i].fio);
+        scanf("%d",&loja[i].fio);
         printf("Digite o valor do fio: ");
         scanf("%f", &loja[i].valor_fio);
         printf("Digite a altura: ");
@@ -135,15 +133,17 @@ void tela() // esse procedimento é para apenas vendas de telas de arame
         scanf("%f", &loja[i].largura);
 
         result=loja[i].valor_fio*loja[i].altura*loja[i].largura;
-        fprintf("NOME: %s | FIO: %d | VALOR DO FIO: %.1f | ALTURA: %.1f | LARGURA: %.1f | TOTAL: R$%.1f\n",loja[i].nome,loja[i].valor_fio,loja[i].altura,loja[i].largura,result);
+        fprintf(tela,"NOME: %s        | FIO: %d        | VALOR DO FIO: %.1f        | ALTURA: %.1f        | LARGURA: %.1f        | TOTAL: R$%.1f\n",loja[i].nome,loja[i].fio,loja[i].valor_fio,loja[i].altura,loja[i].largura,result);
         fclose(tela);
     }
 }
 void simula() // simula as vendas e mostra na tela sem usar espaço de memoria
-{  
-    int i=1;
+{
+    int i=1,n;
     float result=0;
- while (i >= 0)
+       printf("Digite quantas telas serao vendidas: ");
+       scanf("%d", &n);
+    for(i=0;i<n; i++)
     {
         printf("Digite o tipo de tela: ");
         scanf("%s",&loja[i].nome);
@@ -157,21 +157,21 @@ void simula() // simula as vendas e mostra na tela sem usar espaço de memoria
         scanf("%f", &loja[i].largura);
 
         result=loja[i].valor_fio*loja[i].altura*loja[i].largura;
-        fprintf("FIO: %d | VALOR DO FIO: %.1f | ALTURA: %.1f | LARGURA: %.1f | TOTAL: R$%.1f\n",loja[i].nome,loja[i].valor_fio,loja[i].altura,loja[i].largura,result);
+        printf("FIO: %d | VALOR DO FIO: %.1f | ALTURA: %.1f | LARGURA: %.1f | TOTAL: R$%.1f\n",loja[i].nome,loja[i].fio,loja[i].valor_fio,loja[i].altura,loja[i].largura,result);
     }
 }
 
 int main()
 {
     int op;
-    
+
 
                             //diretorio       //segurança
-    if (CreateDirectory("C:\\RelatoriosLoja", NULL))  // ordem de criação de pasta 
+    if (CreateDirectory("C:\\RelatoriosLoja", NULL))  // ordem de criação de pasta
     {
         printf("Arquivo criado com sucesso\n");
     }
- 
+
 
     printf("Escolha uma opcao: \n [1] Adicionar um produto \n [2] Realizar uma venda\n [3] Realizar uma venda de tela\n [4] Simular venda de tela\n [0] sair: ");
     scanf("%d", &op);
