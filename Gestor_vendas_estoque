@@ -1,201 +1,300 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
 #include <locale.h>
 #include <stdbool.h>
-#define MAX 100
+#define MAX_VENDAS 100
+#define MAX_PRODUTOS 100
+#define MAX_NOME 100
+
+struct Produto
+{
+    int id;
+    char nome[MAX_NOME];
+    int quantidade; //Em estoque
+};
+
 
 struct Vendas
 {
     int id;
-    int vendas_realizadas[MAX];
-    float valor_venda;
-    int quantidade;
+    int nome;
+    float valorVenda;
+    int qtdVendido;
+    int quantidadeVenda;
     int fio;
     float valor_fio;
     float largura;
     float altura;
-    char nome[MAX];
-};
-struct Estoque
-{
-    int id;
-    char produto[MAX];
-    float preco;
-    int quantity;
 };
 
 
-struct Vendas loja[MAX];
-struct Estoque estk[MAX];
+struct Produto estoqueProdutos[MAX_PRODUTOS];
+struct Vendas vendasRealizadas[MAX_VENDAS];
 
 
 
-void cadastrar()// cadastra os produtos e cria um arquivo de texto para serem guardados e consultados quando forem precisos
+
+void salvaProdutoArquivo()
 {
-
-    int i = 0, n = 0;char ler =0;
-
-
+    int i = 0, n = 0,k=1;
+    int id=0;
     FILE *estoq;
-    estoq = fopen("C:\\RelatoriosLoja\\estoque.txt", "a");
+    estoq = fopen("C:\\RelatoriosvendasRealizadas\\estoque.txt", "a");
     if (estoq == NULL)
     {
         printf("Erro ao abrir o arquivo.\n");
         return 1;
     }
 
-    printf("Digite quantos produtos serao cadastrados:");
-    scanf("%d", &n);
-    if (n == 0)
-    {
-        printf("INVALIDO! TENTE NOVAMENTE");
-    }
-    for (i = 0; i < n; i++)
+    do
     {
 
         printf("Digite o id do produto: ");
-        scanf("%d", &estk[i].id);
-        while((estk[i].id>=0)==false){
-             printf("ID INVALIDO! TENTE NOVAMENTE");
-
+        scanf("%d",&id);
+        if(id<=0)
+        {
+            printf("ID INVALIDO! TENTE NOVAMENTE\n");
+            salvaProdutoArquivo();
         }
-        printf("Digite o nome do produto: ");
-        scanf("%s", &estk[i].produto);
+      
+        fprintf(estoq, "\nID: %d |",id);
+    
+        i++;
+        fclose(estoq);
+        cadastrarproduto();
+    } while (i == 0);
+}
+void cadastrarproduto()
+{
+    FILE *estoq;
+    char word = 0;
+    int i = 0;
 
-        while((estk[i].produto>='a' || estk[i].produto <='z' || estk[i].produto>='A' || estk[i].produto <='Z')==false){
-            printf("NOME INVALIDO! TENTE NOVAMENTE");
+    estoq = fopen("C:\\RelatoriosvendasRealizadas\\estoque.txt", "a");
+    if (estoq == NULL)
+    {
+        printf("Erro ao abrir o arquivo.\n");
+        return 1;
+    }
+
+    do
+    {
+
+        printf("Digite o nome do produto: ");
+        scanf("%s", &estoqueProdutos[i].nome);
+        while ((estoqueProdutos[i].nome >= 'a' || estoqueProdutos[i].nome <= 'z' || estoqueProdutos[i].nome >= 'A' || estoqueProdutos[i].nome <= 'Z') == false)
+        {
+            printf("NOME INVALIDO! TENTE NOVAMENTE\n");
             break;
         }
-        printf("Digite a quantidade: ");
-        scanf("%d", &estk[i].quantity);
 
-        printf("Digite o preco: ");
-        scanf("%f", &estk[i].preco);
-        while((estk[i].preco>=0)==false){
-             printf("PRECO INVALIDO! TENTE NOVAMENTE");
-             break;
+        word = strlen(estoqueProdutos[i].nome);
+
+        if (word > 17)
+        {
+            printf("digite um nome com maximo 17 carcteres! \n");
+            return cadastrarproduto();
         }
-
-
-        fprintf(estoq, "| ID: %d | PRODUTO: %s | QUANTIDADE: %d | PREÇO:R$%.1f |\n", estk[i].id, estk[i].produto,estk[i].quantity, estk[i].preco);
-    }
-
-    for (int j = 0; j < i; j++)
-    {
-        printf("O produto inserido foi ID[%d] produto: [%s]", estk[j].id, estk[j].produto);
-    }
-    fclose(estoq);
+        else
+        {
+            fprintf(estoq, "PRODUTO: %s", estoqueProdutos[i].nome);
+            for (word; word <= 17; word++)
+            {
+                fprintf(estoq, " ");
+            }
+        }
+        i++;
+        fclose(estoq);
+        cadastrar_quantidade_preco();
+    } while (i == 0);
 }
-void realizar_venda()// esse procedimento é para de venda de um produto qualquer sem especificações
+void cadastrar_quantidade_preco()
 {
-    int i, v,n=0,sobrou=0;
+
+    char c = 1, word = 0;
+    int i = 0, cond = 0,quantidade;
+    FILE *estoq;
+    estoq = fopen("C:\\RelatoriosvendasRealizadas\\estoque.txt", "a");
+    if (estoq == NULL)
+    {
+        printf("Erro ao abrir o arquivo.\n");
+        return 1;
+    }
+    do
+    {
+
+        printf("Digite a quantidade: ");
+        scanf("%d", &quantidade);
+
+       
+
+        fprintf(estoq, "| QUANTIDADE: %d\n",quantidade);
+        printf("PRODUTO CADASTRADO! DIGITE 0 PARA SALVAR OU 1 PARA CONTINUAR CADASTRANDO!\n");
+        scanf("%d", &cond);
+        if (cond == 0)
+        {
+            fclose(estoq);
+            printf("SALVO COM SUCESSO!\n");
+            break;
+            return 0;
+        }
+        else
+        {
+            salvaProdutoArquivo();
+        }
+    } while (i == 0);
+}
+void realizar_venda()
+{
+    int i = 1, v, sobrou = 0, valor = 0,valor_id=0,qtdVendido;
+    int id=0;
+    float valorVenda;
     FILE *vendi;
-    vendi = fopen("C:\\RelatoriosLoja\\vendas.txt", "a");
-     printf("Digite quantos produtos serao vendidos: ");
-     scanf("%d", &n);
-    for(i=0;i<n; i++)
+    vendi = fopen("C:\\RelatoriosvendasRealizadas\\vendas.txt", "a");
+   
+    if (vendi == NULL)
     {
-        printf("Digite o id do produto: ");
-        scanf("%d", &loja[i].id);
-
-
-        printf("Qual valor da venda:R$ ");
-        scanf("%f", &loja[i].valor_venda);
-
-        v++;
-        loja[i].vendas_realizadas[i] = v;
-
-
-        fprintf(vendi," ID:%d      | VALOR R$%.1f \n ", loja[i].id, loja[i].valor_venda);
+        printf("Erro ao abrir o arquivo.\n");
+        return 1;
     }
+
+    printf("Digite o id do produto: ");
+    scanf("%d", &id);
+    fprintf(vendi, "ID: %d |", id);
+        
+
+    printf("Digite a quantidade: ");
+    scanf("%d", &qtdVendido);
+
+    printf("Qual valor da venda:R$ ");
+    scanf("%f", &valorVenda);
+    if(valorVenda<=0)
+    {
+        printf("ID INVALIDO! TENTE NOVAMENTE");
+        return 0;
+
+    }
+        
+    fprintf(vendi, "VALOR: %.1f", valorVenda);
+    fprintf(vendi, "| QUANTIDADE: %d ",qtdVendido);
+    return main();
 }
-void tela() // esse procedimento é para apenas vendas de telas de arame
+
+void venda_tela()
 {
-    float result=0;
-    int i=0,n;
-     FILE *tela;
-    tela = fopen("C:\\RelatoriosLoja\\vendas_tela.txt", "a");
-     printf("Digite quantos produtos serao vendidos: ");
-     scanf("%d", &n);
-    for(i=0;i<n; i++)
+    float result = 0,altura=0,largura;
+    int i = 1,valor_tela=0,word,fio,valor_fio=0,valor_altura,valor_largura;
+    char nome;
+    FILE *tela;
+    tela = fopen("C:\\RelatoriosvendasRealizadas\\vendas_tela.txt", "a");
+    while (i != 0)
     {
         printf("Digite o tipo de tela: ");
-        scanf("%s",&loja[i].nome);
-        printf("Digite qual FIO: ");
-        scanf("%d",&loja[i].fio);
-        printf("Digite o valor do fio: ");
-        scanf("%f", &loja[i].valor_fio);
-        printf("Digite a altura: ");
-        scanf("%f", &loja[i].altura);
-        printf("Digite a largura: ");
-        scanf("%f", &loja[i].largura);
+        scanf("%s", &nome);
+       word = strlen(nome);
 
-        result=loja[i].valor_fio*loja[i].altura*loja[i].largura;
-        fprintf(tela,"NOME: %s        | FIO: %d        | VALOR DO FIO: %.1f        | ALTURA: %.1f        | LARGURA: %.1f        | TOTAL: R$%.1f\n",loja[i].nome,loja[i].fio,loja[i].valor_fio,loja[i].altura,loja[i].largura,result);
+        if (word > 17)
+        {
+            printf("digite um nome com maximo 17 carcteres! \n");
+            return venda_tela();
+        }
+        else
+        {
+            fprintf(tela, "PRODUTO: %s", nome);
+            for (word; word <= 17; word++)
+            {
+                fprintf(tela, " ");
+            }
+        }
+        printf("Digite qual FIO: ");
+        scanf("%d", &fio);
+        
+        fprintf(tela, "FIO: %d", fio);
+        
+        printf("Digite o valor do fio: ");
+        scanf("%f", &valor_fio);
+        
+        fprintf(tela, "VALOR DO FIO: %.1f", valor_fio);
+        
+        printf("Digite a altura: ");
+        scanf("%f", &altura);
+        
+        fprintf(tela, "ALTURA: %.1f", altura);
+         
+        printf("Digite a largura: ");
+        scanf("%f", &largura);
+        
+        fprintf(tela, "LARGURA: %.1f", altura);
+       
+
+        result = valor_fio * altura * largura;
+        fprintf(tela,"| TOTAL: R$%.1f\n", result);
         fclose(tela);
+        i++;
     }
 }
-void simula() // simula as vendas e mostra na tela sem usar espaço de memoria
+void simula()
 {
-    int i=1,n;
-    float result=0;
-       printf("Digite quantas telas serao vendidas: ");
-       scanf("%d", &n);
-    for(i=0;i<n; i++)
+    int i = 1,fio;
+    float result = 0,altura,largura,valor_fio;
+    char nome = 0;
+    while (i >= 0)
     {
         printf("Digite o tipo de tela: ");
-        scanf("%s",&loja[i].nome);
+        scanf("%s", &nome);
         printf("Digite qual FIO: ");
-        scanf("%d", &loja[i].fio);
+        scanf("%d", &fio);
         printf("Digite o valor do fio: ");
-        scanf("%f", &loja[i].valor_fio);
+        scanf("%f", &valor_fio);
         printf("Digite a altura: ");
-        scanf("%f", &loja[i].altura);
+        scanf("%f", &altura);
         printf("Digite a largura: ");
-        scanf("%f", &loja[i].largura);
+        scanf("%f", &largura);
 
-        result=loja[i].valor_fio*loja[i].altura*loja[i].largura;
-        printf("FIO: %d | VALOR DO FIO: %.1f | ALTURA: %.1f | LARGURA: %.1f | TOTAL: R$%.1f\n",loja[i].nome,loja[i].fio,loja[i].valor_fio,loja[i].altura,loja[i].largura,result);
+        result = valor_fio * altura * largura;
+        fprintf("FIO: %d | VALOR DO FIO: %.1f | ALTURA: %.1f | LARGURA: %.1f | TOTAL: R$%.1f\n", nome, valor_fio, altura, largura, result);
     }
 }
 
 int main()
 {
     int op;
-
-
-                            //diretorio       //segurança
-    if (CreateDirectory("C:\\RelatoriosLoja", NULL))  // ordem de criação de pasta
+    // diretorio       //segurança
+    if (CreateDirectory("C:\\RelatoriosvendasRealizadas", NULL))
     {
         printf("Arquivo criado com sucesso\n");
     }
 
-
-    printf("Escolha uma opcao: \n [1] Adicionar um produto \n [2] Realizar uma venda\n [3] Realizar uma venda de tela\n [4] Simular venda de tela\n [0] sair: ");
+    printf("Escolha uma opcao: \n [1] Adicionar um produto \n [2] Realizar uma venda\n [3] Realizar uma venda de tela\n [4] Simular venda de tela\n [0] Sair/Salvar: ");
     scanf("%d", &op);
-    if (op >= 0 && op <= 4);
+
+    if (op == 1)
+    {
+        salvaProdutoArquivo();
+    }
+    else if (op == 2)
+    {
+        realizar_venda();
+    }
+   else if (op == 3)
+    {
+        venda_tela();
+    }
+   else if (op == 4)
+    {
+        simula();
+    }
+    else if(op == 0)
+    {
+        printf("SALVO COM SUCESSO!\n");
+        return 0;
+    }
     else
     {
         printf("OPCAO INVALIDA!\n");
     }
-    if (op == 1)
-    {
-        cadastrar();
-    }
-    if (op == 2)
-    {
-        realizar_venda();
-    }
-      if (op == 3)
-    {
-        tela();
-    }
-     if (op == 4)
-    {
-        simula();
-    }
-
     return 0;
 }
